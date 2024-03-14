@@ -1,38 +1,46 @@
-# Use a Node.js LTS Alpine image as the base image
-FROM node:lts-alpine
+# set the base image to create the image for react app
+FROM node:20-alpine
 
-# Create a non-root user and group named "app"
+# create a user with permissions to run the app
+# -S -> create a system user
+# -G -> add the user to a group
+# This is done to avoid running the app as root
+# If the app is run as root, any vulnerability in the app can be exploited to gain access to the host system
+# It's a good practice to run the app as a non-root user
 RUN addgroup app && adduser -S -G app app
 
-# Switch to the non-root user "app"
+# set the user to run the app
 USER app
 
-# Set the NODE_ENV environment variable to "production"
-ENV NODE_ENV=production
+# set the working directory to /app
+WORKDIR /app
 
-# Set the working directory inside the container
-WORKDIR /usr/src/app
+# copy package.json and package-lock.json to the working directory
+# This is done before copying the rest of the files to take advantage of Docker’s cache
+# If the package.json and package-lock.json files haven’t changed, Docker will use the cached dependencies
+COPY package*.json ./
 
-# Copy package.json, package-lock.json, and npm-shrinkwrap.json files to the working directory
-COPY ["package.json*", "package-lock.json*",  "./"]
-
-# Switch back to root user temporarily to change ownership of files
+# sometimes the ownership of the files in the working directory is changed to root
+# and thus the app can't access the files and throws an error -> EACCES: permission denied
+# to avoid this, change the ownership of the files to the root user
 USER root
 
-# Change ownership of files to the non-root user "app"
+# change the ownership of the /app directory to the app user
+# chown -R <user>:<group> <directory>
+# chown command changes the user and/or group ownership of for given file.
 RUN chown -R app:app .
 
-# Install npm dependencies
+# change the user back to the app user
+USER app
+
+# install dependencies
 RUN npm install
 
-# Install Vite as a development dependency
-RUN npm install vite --save-dev
-
-# Copy the rest of the application files to the working directory
+# copy the rest of the files to the working directory
 COPY . .
 
-# Expose port 5173 to allow external connections (adjust if necessary)
+# expose port 5173 to tell Docker that the container listens on the specified network ports at runtime
 EXPOSE 5173
 
-# Specify the command to run the application (adjust as needed)
+# command to run the app
 CMD npm run dev
