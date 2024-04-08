@@ -7,6 +7,7 @@ import path from 'path';
 import connect from './config/db.js';
 import appRoutes from './routes/app.route.js';
 import coreRoutes from './routes/core.route.js';
+import { errorMiddleware } from './middleware/errorMiddleware.js';
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use('/Assets', express.static(path.join(currentDir, 'Assets')));
 
 app.use(appRoutes);
 app.use(coreRoutes);
+app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 4000;
 
