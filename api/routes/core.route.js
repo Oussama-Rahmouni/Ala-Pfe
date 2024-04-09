@@ -2,9 +2,9 @@ import express from 'express';
 const router = express.Router();
 
 // Import core controllers
-import UserController from '../core/controllers/userController.js';
 import AuthController from '../core/controllers/authController.js';
-import AdministrationController from '../core/controllers/administrationController.js';
+// import UserController from '../core/controllers/userController.js';
+// import AdministrationController from '../core/controllers/administrationController.js';
 
 // Middleware
 import { authenticate, authorize } from '../middleware/authMiddleware.js';
