@@ -7,9 +7,9 @@ import path from 'path';
 
 // Import database connection function, route handlers, and error middleware
 import connect from './config/db.js';
-import appRoutes from './routes/app.route.js';
+// import appRoutes from './routes/app.route.js';
 import coreRoutes from './routes/core.route.js';
-import { errorMiddleware } from './middleware/errorMiddleware.js';
+import { errorMiddleware } from './middlewares/errorMiddleware.js'
 
 // Initialize environment variables
 dotenv.config();
@@ -41,7 +41,7 @@ const currentDir = path.dirname(currentPath);
 app.use('/Assets', express.static(path.join(currentDir, 'Assets')));
 
 // Use the defined routes for the application
-app.use(appRoutes);
+// app.use(appRoutes);
 app.use(coreRoutes);
 
 // Global error handling middleware
