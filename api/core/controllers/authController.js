@@ -7,7 +7,7 @@ class AuthController {
 
   // Register Admin
   static async registerAdmin(req, res) {
-    const { email, password } = req.body;
+    const { email, password, FirstName, LastName } = req.body;
     try {
       const existingAdmin = await administrationModel.findOne({ email, role: 'admin' });
       if (existingAdmin) {
@@ -18,11 +18,13 @@ class AuthController {
       const newAdmin = await administrationModel.create({
         email,
         password: hashedPassword,
+        FirstName:FirstName,
+        LastName : LastName,
         role: 'admin'
       });
 
       const token = jwt.sign({ email: newAdmin.email, id: newAdmin._id, role: newAdmin.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-      res.status(201).json({ newAdmin, token });
+      res.status(201).json({ token });
     } catch (error) {
       res.status(500).json({ message: "Something went wrong", Error:error.message });
     }
