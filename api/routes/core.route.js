@@ -10,7 +10,7 @@ import AuthController from '../core/controllers/authController.js';
 // import { authenticate, authorize } from '../middleware/authMiddleware.js';
 
 //demande d'inscription
-// router.post('/demand', AuthController.demandInscription);
+router.post('/demand', AuthController.demandInscription);
 
 // Authentication Routes
 // router.post('/login', AuthController.login);

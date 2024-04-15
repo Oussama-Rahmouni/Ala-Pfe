@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import administrationModel from '../models/administrationModel.js';
-import nodemailer from 'nodemailer'; // For sending emails
+import sendEmail from '../../utils/emailHelper.js';
+import {generateToken, generateRefreshToken } from '../../utils/tokenHelper.js'
 
 class AuthController {
 
@@ -23,59 +24,61 @@ class AuthController {
         role: 'admin'
       });
 
-      const token = jwt.sign({ email: newAdmin.email, id: newAdmin._id, role: newAdmin.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-      res.status(201).json({ token });
+      const token = generateToken(adminUser);
+      const refreshToken = generateRefreshToken(adminUser);
+  
+      // Set HTTPOnly cookies
+      res.cookie('accessToken', token, { httpOnly: true, sameSite: 'Strict' });
+      res.cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'Strict' });
+      res.status(201).json({ result: adminUser, token, refreshToken });  // Optionally return tokens in response
     } catch (error) {
       res.status(500).json({ message: "Something went wrong", Error:error.message });
     }
   }
 
-  static async loginAdmin(req,res){
-    try{
-    const {email, password} = req.body;
-
-    const adminUser = await administrationModel.findOne({email:email})
-
-    if(!adminUser) {return res.status(401).json({message : "no admin with these data is registred"})}
-    
-    const isPasswordCorrect = await bcrypt.compare(password, adminUser.password);
-    if (!isPasswordCorrect) {
+  static async loginAdmin(req, res) {
+    try {
+      const { email, password } = req.body;
+      const adminUser = await administrationModel.findOne({ email });
+  
+      if (!adminUser) {
+        return res.status(401).json({ message: "No admin with these data is registered" });
+      }
+  
+      const isPasswordCorrect = await bcrypt.compare(password, adminUser.password);
+      if (!isPasswordCorrect) {
         return res.status(400).json({ message: "Invalid credentials" });
       }
-
-    const token = jwt.sign({ email: adminUser.email, id: adminUser._id, role: adminUser.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-      res.status(200).json({ result: adminUser, token });
+  
+      const token = generateToken(adminUser);
+      const refreshToken = generateRefreshToken(adminUser);
+  
+      // Set HTTPOnly cookies
+      res.cookie('accessToken', token, { httpOnly: true, sameSite: 'Strict' });
+      res.cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'Strict' });
+  
+      res.status(200).json({ result: adminUser, token, refreshToken });  // Optionally return tokens in response
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   }
+  
   // Method to handle pre-registration demands by students
   static async demandInscription(req, res) {
     const { name, surname, phoneNumber, email } = req.body;
-    // Simulate email sending to admin for approval
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'your-admin-email@gmail.com',
-        pass: 'your-admin-email-password',
-      },
-    });
-
     const mailOptions = {
-      from: 'your-admin-email@gmail.com',
-      to: 'admin@yourdomain.com',
+      from: 'oussama.rahmouni.manager@gmail.com',  // Email from which the message is sent
+      to: 'oussama.rahmouni.manager@gmail.com',          // Admin's email to receive requests
       subject: 'New Student Registration Request',
       text: `Registration request from ${name} ${surname}, Email: ${email}, Phone: ${phoneNumber}`,
     };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        return res.status(500).json({ message: 'Failed to send email', error });
-      } else {
-        return res.status(200).json({ message: 'Demand sent successfully', info: info.response });
-      }
-    });
+  
+    const { success, result, error } = await sendEmail(mailOptions);
+    if (!success) {
+      return res.status(500).json({ message: 'Failed to send email', error });
+    } else {
+      return res.status(200).json({ message: 'Demand sent successfully', info: result.response });
+    }
   }
 
   // User Login
