@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import administrationModel from '../models/administrationModel.js';
 import sendEmail from '../../utils/emailHelper.js';
 import {generateToken, generateRefreshToken } from '../../utils/tokenHelper.js'
+import Request from '../models/requestModel.js';
 
 class AuthController {
 
@@ -77,7 +78,14 @@ class AuthController {
     if (!success) {
       return res.status(500).json({ message: 'Failed to send email', error });
     } else {
-      return res.status(200).json({ message: 'Demand sent successfully', info: result.response });
+      try {
+        const newRequest = new Request({ name, surname, email, phoneNumber });
+        await newRequest.save();
+        return res.status(200).json({ message: 'Demand sent successfully', info: result.response });
+
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
     }
   }
 
