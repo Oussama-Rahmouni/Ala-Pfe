@@ -6,36 +6,27 @@ import "./App.css";
 import SignInSide from "./pages/adminAuth/Login";
 import SignUp from "./pages/adminAuth/Register";
 import Dashboard from "./pages/adminDashboard/Dashboard";
-
-// const queryClient = new QueryClient();
-
-// const Layout = () => {
-//   return (
-//     <div className="app">
-//       <QueryClientProvider client={queryClient}>
-//         <NavBar />
-//         <Outlet />
-//         <Footer />
-//       </QueryClientProvider>
-//     </div>
-//   );
-// };
+import UsersTable from "./components/adminDash/UsersTable";
+import Test from "./pages/Test";
 
 function App() {
   const queryClient = new QueryClient();
 
   const router = createBrowserRouter([
-    // {
-    //   path: '/',
-    //   element: <Layout />,
-
-    //   children: [
-    //     {
-    //       path: '/',
-    //       element: <Home />,
-    //     }
-    //   ]
-    // },
+    {
+      path: "/",
+      element: <Dashboard />,
+      children: [
+        {
+          index: true,
+          element: <UsersTable />,
+        },
+        {
+          path: "/new",
+          element: <Test />,
+        },
+      ],
+    },
     {
       path: "/adminLogin",
       element: <SignInSide />,
@@ -44,16 +35,12 @@ function App() {
       path: "/adminRegister",
       element: <SignUp />,
     },
-    {
-      path: "/dashboard",
-      element: <Dashboard />,
-    },
   ]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />;
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   );
 }
