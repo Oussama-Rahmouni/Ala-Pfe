@@ -78,16 +78,17 @@ class TrainerController {
   static async updateProfile(req, res) {
     try {
     const { id } = req.user;
-    const { name, interests, password, email } = req.body;
+    const {  name, email, password, phone, expertise } = req.body;
     let updateData = {};
     if (name) updateData.name = name;
-    if (interests) updateData.interests = interests;
+    if (phone) updateData.phone = phone;
     if (password) updateData.password = password;
     if (email) updateData.email = email;
+    if (expertise) updateData.expertise = expertise;
 
-    const updatedLearner = await Learner.findByIdAndUpdate(id, updateData, { new: true });
+    const Trainer = await trainerSchema.findByIdAndUpdate(id, updateData, { new: true });
     
-    res.status(200).json(updatedLearner);
+    res.status(200).json(Trainer);
     } catch (error) {
       res.status(500).json({ message: 'Something went wrong.' });
     }

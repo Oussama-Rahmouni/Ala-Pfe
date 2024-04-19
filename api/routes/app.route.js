@@ -28,7 +28,7 @@ router.put('/learners/update', authenticate, authorize(['learner']), LearnerCont
 router.post('/trainers/register', TrainerController.register);
 router.post('/trainers/login', TrainerController.login);
 router.post('/trainers/logout', TrainerController.logout);
-// router.put('/trainers/:id', authenticate, TrainerController.updateProfile);
+router.put('/trainers/update', authenticate, authorize(['trainer']), TrainerController.updateProfile);
 // // More trainer routes...
 
 // // Course Routes
