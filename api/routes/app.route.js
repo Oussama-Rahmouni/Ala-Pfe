@@ -4,7 +4,7 @@ const router = express.Router();
 // Import controllers
 import LearnerController from '../app/controllers/learnerController.js';
 import TrainerController from '../app/controllers/trainerController.js';
-// import CourseController from '../app/controllers/courseController.js';
+import CourseController from '../app/controllers/courseController.js';
 // import ReviewController from '../app/controllers/reviewController.js';
 // import CategoryController from '../app/controllers/categoryController.js';
 // import EnrollmentController from '../app/controllers/enrollmentController.js';
@@ -29,10 +29,9 @@ router.post('/trainers/register', TrainerController.register);
 router.post('/trainers/login', TrainerController.login);
 router.post('/trainers/logout', TrainerController.logout);
 router.put('/trainers/update', authenticate, authorize(['trainer']), TrainerController.updateProfile);
-// // More trainer routes...
 
 // // Course Routes
-// router.post('/courses', authenticate, authorize(['trainer', 'admin']), CourseController.createCourse);
+router.post('/courses', authenticate, authorize(['admin']), CourseController.createCourse);
 // router.get('/courses', CourseController.listAllCourses);
 // // More course routes...
 
