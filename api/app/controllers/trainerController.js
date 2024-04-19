@@ -43,23 +43,23 @@ class TrainerController {
   static async login(req, res) {
     const { email, password } = req.body;
     try {
-      const learner = await Learner.findOne({ email });
-      if (!learner) {
-        return res.status(404).send('Learner not found.');
+      const Trainer = await trainerSchema.findOne({ email });
+      if (!Trainer) {
+        return res.status(404).send('Trainer not found.');
       }
 
-      const isPasswordCorrect = await bcrypt.compare(password, learner.password);
+      const isPasswordCorrect = await bcrypt.compare(password, Trainer.password);
       if (!isPasswordCorrect) {
         return res.status(400).send('Invalid credentials.');
       }
 
       // Generate JWT token
-      const token = generateToken(learner);
-      const refreshToken = generateRefreshToken(learner);
+      const token = generateToken(Trainer);
+      const refreshToken = generateRefreshToken(Trainer);
       res.cookie('accessToken', token, { httpOnly: true, sameSite: 'Strict' });
       res.cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'Strict' });
 
-      res.status(200).json({ learner, token, refreshToken });
+      res.status(200).json({ Trainer, token, refreshToken });
     } catch (error) {
       res.status(500).json({ message: 'Something went wrong.' });
     }
