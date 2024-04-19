@@ -105,13 +105,21 @@ class LearnerController {
     
       res.status(200).send({ message: 'Logged out successfully' });
   }
+  
   // Update learner profile
   static async updateProfile(req, res) {
-    const { id } = req.params;
-    const { name, interests } = req.body;
     try {
-      const updatedLearner = await Learner.findByIdAndUpdate(id, { name, interests }, { new: true });
-      res.status(200).json(updatedLearner);
+    const { id } = req.user;
+    const { name, interests, password, email } = req.body;
+    let updateData = {};
+    if (name) updateData.name = name;
+    if (interests) updateData.interests = interests;
+    if (password) updateData.password = password;
+    if (email) updateData.email = email;
+
+    const updatedLearner = await Learner.findByIdAndUpdate(id, updateData, { new: true });
+    
+    res.status(200).json(updatedLearner);
     } catch (error) {
       res.status(500).json({ message: 'Something went wrong.' });
     }

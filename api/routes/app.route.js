@@ -13,7 +13,8 @@ import LearnerController from '../app/controllers/learnerController.js';
 // import CertificateController from '../app/controllers/certificateController.js';
 
 // // Middleware
-// import { authenticate } from '../middlewares/authMiddleware.js';
+import { authenticate, authorize } from '../middlewares/authMiddleware.js';
+
 //demande d'inscription
 router.post('/learner/demand', LearnerController.demandInscription);
 
@@ -21,6 +22,8 @@ router.post('/learner/demand', LearnerController.demandInscription);
 router.post('/learners/register', LearnerController.register);
 router.post('/learners/login', LearnerController.login);
 router.post('/learners/logout', LearnerController.logout);
+
+router.put('/learners/update', authenticate, authorize(['learner']), LearnerController.updateProfile)
 // router.put('/learners/:id', authenticate, LearnerController.updateProfile);
 // // More learner routes...
 
