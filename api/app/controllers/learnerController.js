@@ -1,13 +1,46 @@
 import Learner from '../models/learnerModel.js';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
+import sendEmail from '../../utils/emailHelper.js' 
+import Request from '../models/requestModel.js';
+import { generateRefreshToken, generateToken } from '../../utils/tokenHelper.js';
 class LearnerController {
+  
+   // Method to handle pre-registration demands by students
+   static async demandInscription(req, res) {
+    const { name, surname, phoneNumber, email } = req.body;
+    const mailOptions = {
+      from: 'oussama.rahmouni.manager@gmail.com',  // Email from which the message is sent
+      to: 'oussama.rahmouni.manager@gmail.com',          // Admin's email to receive requests
+      subject: 'New Student Registration Request',
+      text: `Registration request from ${name} ${surname}, Email: ${email}, Phone: ${phoneNumber}`,
+    };
+  
+    const { success, result, error } = await sendEmail(mailOptions);
+    if (!success) {
+      return res.status(500).json({ message: 'Failed to send email', error });
+    } else {
+      try {
+        const newRequest = new Request({ name, surname, email, phoneNumber });
+        await newRequest.save();
+        return res.status(200).json({ message: 'Demand sent successfully', info: result.response });
+
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+    }
+  }
   
   // Register a new learner
   static async register(req, res) {
     const { name, email, password, interests } = req.body;
     try {
+      // Check if the learner's registration request has been approved
+      const approvedRequest = await Request.findOne({ email, status: 'approved' });
+      if (!approvedRequest) {
+        return res.status(403).json({ message: 'Your registration request has not been approved by the admin.' });
+      }
+
       // Check if the learner already exists
       const existingLearner = await Learner.findOne({ email });
       if (existingLearner) {
@@ -27,9 +60,12 @@ class LearnerController {
       await learner.save();
 
       // Generate JWT token
-      const token = jwt.sign({ email: learner.email, id: learner._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      const token = generateToken(learner);
+      const refreshToken = generateRefreshToken(learner);
+      res.cookie('accessToken', token, { httpOnly: true, sameSite: 'Strict' });
+      res.cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'Strict' });
 
-      res.status(201).json({ learner, token });
+      res.status(201).json({ learner, token, refreshToken });
     } catch (error) {
       res.status(500).json({ message: 'Something went wrong.' });
     }
@@ -49,14 +85,26 @@ class LearnerController {
         return res.status(400).send('Invalid credentials.');
       }
 
-      const token = jwt.sign({ email: learner.email, id: learner._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      // Generate JWT token
+      const token = generateToken(learner);
+      const refreshToken = generateRefreshToken(learner);
+      res.cookie('accessToken', token, { httpOnly: true, sameSite: 'Strict' });
+      res.cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'Strict' });
 
-      res.status(200).json({ learner, token });
+      res.status(200).json({ learner, token, refreshToken });
     } catch (error) {
       res.status(500).json({ message: 'Something went wrong.' });
     }
   }
 
+  static async logout(req, res){
+
+      // Clear the authentication cookies
+      res.cookie('accessToken', '', { expires: new Date(0) });
+      res.cookie('refreshToken', '', { expires: new Date(0) });
+    
+      res.status(200).send({ message: 'Logged out successfully' });
+  }
   // Update learner profile
   static async updateProfile(req, res) {
     const { id } = req.params;

@@ -1,9 +1,9 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import administrationModel from '../models/administrationModel.js';
-import sendEmail from '../../utils/emailHelper.js';
+
 import {generateToken, generateRefreshToken } from '../../utils/tokenHelper.js'
-import Request from '../models/requestModel.js';
+
 
 class AuthController {
 
@@ -64,83 +64,14 @@ class AuthController {
     }
   }
   
-  // Method to handle pre-registration demands by students
-  static async demandInscription(req, res) {
-    const { name, surname, phoneNumber, email } = req.body;
-    const mailOptions = {
-      from: 'oussama.rahmouni.manager@gmail.com',  // Email from which the message is sent
-      to: 'oussama.rahmouni.manager@gmail.com',          // Admin's email to receive requests
-      subject: 'New Student Registration Request',
-      text: `Registration request from ${name} ${surname}, Email: ${email}, Phone: ${phoneNumber}`,
-    };
+  static async logout(req, res) {
+    // Clear the authentication cookies
+    res.cookie('accessToken', '', { expires: new Date(0) });
+    res.cookie('refreshToken', '', { expires: new Date(0) });
   
-    const { success, result, error } = await sendEmail(mailOptions);
-    if (!success) {
-      return res.status(500).json({ message: 'Failed to send email', error });
-    } else {
-      try {
-        const newRequest = new Request({ name, surname, email, phoneNumber });
-        await newRequest.save();
-        return res.status(200).json({ message: 'Demand sent successfully', info: result.response });
-
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-    }
+    res.status(200).send({ message: 'Logged out successfully' });
+   }
+   
   }
-
-  // User Login
-  static async login(req, res) {
-    const { email, password, role } = req.body;
-    try {
-      const user = await User.findOne({ email, role });
-      if (!user) {
-        return res.status(404).json({ message: "User doesn't exist" });
-      }
-
-      const isPasswordCorrect = await bcrypt.compare(password, user.password);
-      if (!isPasswordCorrect) {
-        return res.status(400).json({ message: "Invalid credentials" });
-      }
-
-      const token = jwt.sign({ email: user.email, id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-      res.status(200).json({ result: user, token });
-    } catch (error) {
-      res.status(500).json({ message: "Something went wrong" });
-    }
-  }
-
-  // Register Trainer (registration process that includes approval mechanism)
-  static async registerTrainer(req, res) {
-    const { email, password } = req.body;
-    try {
-      const existingTrainer = await User.findOne({ email, role: 'trainer', isApproved: false });
-      if (existingTrainer) {
-        return res.status(400).json({ message: "Trainer registration pending approval" });
-      }
-      
-      // Only create account if trainer is approved
-      if (!existingTrainer.isApproved) {
-        return res.status(403).json({ message: "Trainer not approved by admin yet" });
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 12);
-      const newTrainer = await User.create({
-        email,
-        password: hashedPassword,
-        role: 'trainer',
-        isApproved: true // Assuming admin approval
-      });
-
-      const token = jwt.sign({ email: newTrainer.email, id: newTrainer._id, role: newTrainer.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-      res.status(201).json({ newTrainer, token });
-    } catch (error) {
-      res.status(500).json({ message: "Something went wrong" });
-    }
-  }
-
-  // Additional functionalities like logout, password reset, etc., can be implemented similarly.
-}
 
 export default AuthController;

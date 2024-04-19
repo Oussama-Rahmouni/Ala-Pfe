@@ -6,6 +6,7 @@ const trainerSchema = new mongoose.Schema({
   phone: String,
   password: { type: String, required: true },
   expertise: [String],
+  role:{type:String, default:"trainer"},
   coursesTeaching: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course'

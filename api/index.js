@@ -7,7 +7,7 @@ import path from 'path';
 
 // Import database connection function, route handlers, and error middleware
 import connect from './config/db.js';
-// import appRoutes from './routes/app.route.js';
+import appRoutes from './routes/app.route.js';
 import coreRoutes from './routes/core.route.js';
 import { errorMiddleware } from './middlewares/errorMiddleware.js'
 
@@ -25,14 +25,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // CORS middleware configuration for cross-origin requests
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173", // Allow requests from this origin
-    credentials: true, // Allow cookies to be sent with requests
-    methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"], // Allowed HTTP methods
-    allowedHeaders: ["Content-Type", "Authorization"], // Allowed HTTP headers
-  })
-);
+// app.use(
+//   cors({
+//     origin: process.env.CORS_ORIGIN || "http://localhost:5173", // Allow requests from this origin
+//     credentials: true, // Allow cookies to be sent with requests
+//     methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"], // Allowed HTTP methods
+//     allowedHeaders: ["Content-Type", "Authorization"], // Allowed HTTP headers
+//   })
+// );
 
 // Serve static files from the /Assets directory
 const currentUrl = import.meta.url;
@@ -41,7 +41,7 @@ const currentDir = path.dirname(currentPath);
 app.use('/Assets', express.static(path.join(currentDir, 'Assets')));
 
 // Use the defined routes for the application
-// app.use(appRoutes);
+app.use(appRoutes);
 app.use(coreRoutes);
 
 // Global error handling middleware

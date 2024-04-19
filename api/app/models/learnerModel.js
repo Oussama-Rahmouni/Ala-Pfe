@@ -6,6 +6,7 @@ const learnerSchema = new mongoose.Schema({
   phone: String,
   password: { type: String, required: true },
   interests: [String],
+  role:{type:String, default:"learner"},
   completedCourses: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course'

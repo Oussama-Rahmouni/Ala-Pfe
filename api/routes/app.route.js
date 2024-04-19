@@ -1,8 +1,9 @@
-// import express from 'express';
-// const router = express.Router();
+import express from 'express';
+const router = express.Router();
 
-// // Import controllers
-// import LearnerController from '../app/controllers/learnerController.js';
+// Import controllers
+import LearnerController from '../app/controllers/learnerController.js';
+
 // import TrainerController from '../app/controllers/trainerController.js';
 // import CourseController from '../app/controllers/courseController.js';
 // import ReviewController from '../app/controllers/reviewController.js';
@@ -13,10 +14,13 @@
 
 // // Middleware
 // import { authenticate } from '../middlewares/authMiddleware.js';
+//demande d'inscription
+router.post('/learner/demand', LearnerController.demandInscription);
 
 // Learner Routes
-// router.post('/learners/register', LearnerController.register);
-// router.post('/learners/login', LearnerController.login);
+router.post('/learners/register', LearnerController.register);
+router.post('/learners/login', LearnerController.login);
+router.post('/learners/logout', LearnerController.logout);
 // router.put('/learners/:id', authenticate, LearnerController.updateProfile);
 // // More learner routes...
 
@@ -33,4 +37,4 @@
 
 // // Additional routes for reviews, categories, enrollments, notifications, certificates...
 
-// export default router;
+export default router;

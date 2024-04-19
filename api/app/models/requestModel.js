@@ -8,6 +8,7 @@ const requestSchema = new mongoose.Schema({
     status: { type: String, enum: ['new', 'approved', 'rejected'], default: 'new' }
 }, { timestamps: true });
 
+requestSchema.index({ email: 1 }); 
 const Request = mongoose.model('Request', requestSchema);
 
 export default Request;
