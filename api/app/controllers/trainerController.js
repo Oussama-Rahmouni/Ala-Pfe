@@ -94,6 +94,18 @@ class TrainerController {
     }
   }
 
+  static async getTrainer(req, res){
+    
+  }
+
+  static async getAllTrainers(req, res){
+    try {
+      const Trainers = await trainerSchema.find();
+      res.status(200).json({Trainers})
+    } catch (error) {
+      res.status(500).json({error:error.message})
+    }
+  }
 }
 
 export default TrainerController;

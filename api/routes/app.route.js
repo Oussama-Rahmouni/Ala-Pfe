@@ -29,13 +29,14 @@ router.post('/trainers/register', TrainerController.register);
 router.post('/trainers/login', TrainerController.login);
 router.post('/trainers/logout', TrainerController.logout);
 router.put('/trainers/update', authenticate, authorize(['trainer']), TrainerController.updateProfile);
+// router.get('/trainers/:id', authenticate, authorize(['admin']), TrainerController.getTrainer);
+router.get('/trainers', authenticate, authorize(['admin']), TrainerController.getAllTrainers);
 
 // // Course Routes
 router.post('/courses', authenticate, authorize(['admin']), CourseController.createCourse);
 router.get('/courses', CourseController.listAllCourses);
 router.put('/courses/:id', authenticate, authorize(['admin']), CourseController.updateCourse);
 router.delete('/courses/:id', authenticate, authorize(['admin']), CourseController.deleteCourse);
-// // More course routes...
 
 // // Additional routes for reviews, categories, enrollments, notifications, certificates...
 
