@@ -35,9 +35,10 @@ class CourseController{
         }
     }
 
-    static async getCourse(req,res){
+    static async listAllCourses(req,res){
         try {
-            
+            const course = await courseModel.find();
+            res.status(200).json(course) ;
         } catch (error) {
             res.status(500).json({message:error.message})
         }

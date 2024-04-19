@@ -32,9 +32,9 @@ router.put('/trainers/update', authenticate, authorize(['trainer']), TrainerCont
 
 // // Course Routes
 router.post('/courses', authenticate, authorize(['admin']), CourseController.createCourse);
+router.get('/courses', CourseController.listAllCourses);
 router.put('/courses/:id', authenticate, authorize(['admin']), CourseController.updateCourse);
 router.delete('/courses/:id', authenticate, authorize(['admin']), CourseController.deleteCourse);
-// router.get('/courses', CourseController.listAllCourses);
 // // More course routes...
 
 // // Additional routes for reviews, categories, enrollments, notifications, certificates...
