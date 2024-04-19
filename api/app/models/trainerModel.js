@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const trainerSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  phone: String,
+  phone: {type:String},
   password: { type: String, required: true },
   expertise: [String],
   role:{type:String, default:"trainer"},

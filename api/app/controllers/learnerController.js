@@ -1,6 +1,5 @@
 import Learner from '../models/learnerModel.js';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import sendEmail from '../../utils/emailHelper.js' 
 import Request from '../models/requestModel.js';
 import { generateRefreshToken, generateToken } from '../../utils/tokenHelper.js';
@@ -118,7 +117,7 @@ class LearnerController {
     if (email) updateData.email = email;
 
     const updatedLearner = await Learner.findByIdAndUpdate(id, updateData, { new: true });
-    
+
     res.status(200).json(updatedLearner);
     } catch (error) {
       res.status(500).json({ message: 'Something went wrong.' });

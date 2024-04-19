@@ -1,27 +1,41 @@
-import Trainer from '../models/trainerModel.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import Course from '../models/courseModel.js';
-
+import trainerSchema from '../models/trainerModel.js'
+import bcrypt from 'bcrypt';
+import { generateRefreshToken, generateToken } from '../../utils/tokenHelper.js';
 class TrainerController {
-
-  // Register a new trainer
+  
+  // Register a new learner
   static async register(req, res) {
-    const { name, email, password, expertise } = req.body;
+    const { name, email, password, phone, expertise } = req.body;
     try {
-      const existingTrainer = await Trainer.findOne({ email });
+      // Check if the learner already exists
+      const existingTrainer = await trainerSchema.findOne({ email });
       if (existingTrainer) {
-        return res.status(409).json({ message: 'Trainer already exists.' });
+        return res.status(409).send('trainerSchema already exists.');
       }
 
+      // Hash the password
       const hashedPassword = await bcrypt.hash(password, 12);
-      const trainer = new Trainer({ name, email, password: hashedPassword, expertise });
-      await trainer.save();
 
-      const token = jwt.sign({ email: trainer.email, id: trainer._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      res.status(201).json({ trainer, token });
+      // Create a new learner
+      const Trainer = new trainerSchema({
+        name,
+        email,
+        password: hashedPassword,
+        phone,
+        expertise,
+      });
+      await Trainer.save();
+
+      // Generate JWT token
+      const token = generateToken(Trainer);
+      const refreshToken = generateRefreshToken(Trainer);
+      res.cookie('accessToken', token, { httpOnly: true, sameSite: 'Strict' });
+      res.cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'Strict' });
+
+      res.status(201).json({ Trainer, token, refreshToken });
     } catch (error) {
-      res.status(500).json({ message: 'Something went wrong during registration.' });
+      console.log(error)
+      res.status(500).json({ message: error.message });
     }
   }
 
@@ -29,67 +43,55 @@ class TrainerController {
   static async login(req, res) {
     const { email, password } = req.body;
     try {
-      const trainer = await Trainer.findOne({ email });
-      if (!trainer) {
-        return res.status(404).json({ message: 'Trainer not found.' });
+      const learner = await Learner.findOne({ email });
+      if (!learner) {
+        return res.status(404).send('Learner not found.');
       }
 
-      const isPasswordCorrect = await bcrypt.compare(password, trainer.password);
+      const isPasswordCorrect = await bcrypt.compare(password, learner.password);
       if (!isPasswordCorrect) {
-        return res.status(400).json({ message: 'Invalid credentials.' });
+        return res.status(400).send('Invalid credentials.');
       }
 
-      const token = jwt.sign({ email: trainer.email, id: trainer._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      res.status(200).json({ trainer, token });
+      // Generate JWT token
+      const token = generateToken(learner);
+      const refreshToken = generateRefreshToken(learner);
+      res.cookie('accessToken', token, { httpOnly: true, sameSite: 'Strict' });
+      res.cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'Strict' });
+
+      res.status(200).json({ learner, token, refreshToken });
     } catch (error) {
-      res.status(500).json({ message: 'Something went wrong during login.' });
+      res.status(500).json({ message: 'Something went wrong.' });
     }
   }
 
-  // Update trainer profile
-  static async updateProfile(req, res) {
-    const { id } = req.params;
-    const { name, expertise } = req.body;
-    try {
-      const updatedTrainer = await Trainer.findByIdAndUpdate(id, { name, expertise }, { new: true });
-      res.status(200).json(updatedTrainer);
-    } catch (error) {
-      res.status(500).json({ message: 'Something went wrong while updating the profile.' });
-    }
-  }
+  static async logout(req, res){
 
-  // List courses taught by the trainer
-  static async listCourses(req, res) {
-    const { id } = req.params;
-    try {
-      const courses = await Course.find({ trainer: id });
-      res.status(200).json(courses);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to list courses.' });
-    }
-  }
-
-  // Add a course (assuming trainer has the right to create a course directly)
-  static async addCourse(req, res) {
-    const { id } = req.params; // Trainer's ID
-    const { title, description, startDate, endDate, category } = req.body;
-    try {
-      const newCourse = new Course({
-        title,
-        description,
-        startDate,
-        endDate,
-        trainer: id,
-        category
-      });
-      await newCourse.save();
-      res.status(201).json(newCourse);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to add a new course.' });
-    }
+      // Clear the authentication cookies
+      res.cookie('accessToken', '', { expires: new Date(0) });
+      res.cookie('refreshToken', '', { expires: new Date(0) });
+    
+      res.status(200).send({ message: 'Logged out successfully' });
   }
   
-  // Additional methods for updating and deleting courses, etc., can be implemented similarly.
+  // Update learner profile
+  static async updateProfile(req, res) {
+    try {
+    const { id } = req.user;
+    const { name, interests, password, email } = req.body;
+    let updateData = {};
+    if (name) updateData.name = name;
+    if (interests) updateData.interests = interests;
+    if (password) updateData.password = password;
+    if (email) updateData.email = email;
+
+    const updatedLearner = await Learner.findByIdAndUpdate(id, updateData, { new: true });
+    
+    res.status(200).json(updatedLearner);
+    } catch (error) {
+      res.status(500).json({ message: 'Something went wrong.' });
+    }
+  }
 
 }
 
