@@ -36,6 +36,7 @@ router.get('/trainers/:id', authenticate, TrainerController.getTrainer);
 // // Course Routes
 router.post('/courses', authenticate, authorize(['admin']), CourseController.createCourse);
 router.get('/courses', CourseController.listAllCourses);
+router.get('/courses/:id', CourseController.getTraining);
 router.put('/courses/:id', authenticate, authorize(['admin']), CourseController.updateCourse);
 router.delete('/courses/:id', authenticate, authorize(['admin']), CourseController.deleteCourse);
 

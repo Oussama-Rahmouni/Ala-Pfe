@@ -53,6 +53,16 @@ class CourseController{
             res.status(500).json({error:error.message})
         }
     }
+
+    static async getTraining(req,res,next){
+        try {
+            const id = req.params.id;
+            const course = await courseModel.findById(id);
+            res.status(200).json({course:course})
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 export default CourseController;
