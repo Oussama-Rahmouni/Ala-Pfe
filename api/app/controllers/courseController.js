@@ -1,5 +1,6 @@
 import courseModel from "../models/courseModel.js";
 import trainerModel from "../models/trainerModel.js";
+import learnerModel from "../models/learnerModel.js";
 
 class CourseController{
     static async createCourse(req,res){
@@ -59,6 +60,33 @@ class CourseController{
             const id = req.params.id;
             const course = await courseModel.findById(id);
             res.status(200).json({course:course})
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async enrolleCourse(req, res, next){
+        const { courseId } = req.params;
+        const learnerId = req.user.id;
+           
+        try {
+            const course = await courseModel.findById(courseId);
+            if (!course) {
+                return res.status(404).json({ message: "Course not found" });
+            }
+            
+            if (course.learners.includes(learnerId)) {
+                return res.status(400).json({ message: "Learner is already enrolled in this course" });
+            }
+              
+            course.learners.push(learnerId);
+            await course.save();
+
+            const learner = await learnerModel.findById(learnerId);
+            learner.enrolledCourses.push(course._id);
+            await learner.save();
+
+            res.status(200).json({ message: "Enrolled successfully", course });
         } catch (error) {
             next(error)
         }

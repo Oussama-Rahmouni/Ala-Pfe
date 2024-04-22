@@ -5,11 +5,6 @@ const router = express.Router();
 import LearnerController from '../app/controllers/learnerController.js';
 import TrainerController from '../app/controllers/trainerController.js';
 import CourseController from '../app/controllers/courseController.js';
-// import ReviewController from '../app/controllers/reviewController.js';
-// import CategoryController from '../app/controllers/categoryController.js';
-// import EnrollmentController from '../app/controllers/enrollmentController.js';
-// import NotificationController from '../app/controllers/notificationController.js';
-// import CertificateController from '../app/controllers/certificateController.js';
 
 // // Middleware
 import { authenticate, authorize } from '../middlewares/authMiddleware.js';
@@ -35,6 +30,7 @@ router.get('/trainers/:id', authenticate, TrainerController.getTrainer);
 
 // // Course Routes
 router.post('/courses', authenticate, authorize(['admin']), CourseController.createCourse);
+router.post('/courses/:courseId', authenticate,  CourseController.enrolleCourse);
 router.get('/courses', CourseController.listAllCourses);
 router.get('/courses/:id', CourseController.getTraining);
 router.put('/courses/:id', authenticate, authorize(['admin']), CourseController.updateCourse);
