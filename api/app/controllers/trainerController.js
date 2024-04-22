@@ -94,8 +94,14 @@ class TrainerController {
     }
   }
 
-  static async getTrainer(req, res){
-    
+  static async getTrainer(req, res, next){
+    try {
+      const id = req.params.id;
+      const trainer = await trainerSchema.findById(id)
+      res.status(200).json({trainer: trainer})
+    } catch (error) {
+      next(error)
+    }
   }
 
   static async getAllTrainers(req, res){

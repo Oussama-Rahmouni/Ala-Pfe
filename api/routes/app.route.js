@@ -29,8 +29,8 @@ router.post('/trainers/register', TrainerController.register);
 router.post('/trainers/login', TrainerController.login);
 router.post('/trainers/logout', TrainerController.logout);
 router.put('/trainers/update', authenticate, authorize(['trainer']), TrainerController.updateProfile);
-// router.get('/trainers/:id', authenticate, authorize(['admin']), TrainerController.getTrainer);
 router.get('/trainers', authenticate, authorize(['admin']), TrainerController.getAllTrainers);
+router.get('/trainers/:id', authenticate, authorize(['admin']), TrainerController.getTrainer);
 
 // // Course Routes
 router.post('/courses', authenticate, authorize(['admin']), CourseController.createCourse);
