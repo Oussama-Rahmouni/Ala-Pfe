@@ -135,7 +135,25 @@ class LearnerController {
     }
   }
   
-  // Additional methods like viewing completed courses, enrolling in a course, etc., can be added here.
+  static async getAllLearners(req, res, next){
+    try {
+      const learners = await Learner.find();
+      res.status(200).json({learners: learners}) 
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static async getLearner(req,res, next){
+    try {
+      const id = req.params.id;
+      const student = await Learner.findById(id);
+      res.status(200).json({learner: student})
+    } catch (error) {
+      next(error)
+    }
+  }
+
 }
 
 export default LearnerController;
